@@ -1,0 +1,40 @@
+﻿@page "/home"
+@inherits PageComponetBase<HomeModel>
+
+<PageTitle>Home</PageTitle>
+
+@if (Model.User != null)
+{
+    <SectionContent SectionName="header-end-button">
+        <IonButton Name="Logout" OnClick="@(() => base.LogoutAsync())" />
+    </SectionContent>
+
+    <ion-content class="ion-padding">
+        <h1>Hello, world!</h1>
+        Welcome to your new app.
+    </ion-content>
+}
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            await InitializeAsync();
+        }
+    }
+
+    private async Task InitializeAsync()
+    {
+        if (Model.User != null)
+        {
+            StateHasChanged();
+        }
+
+        await JsRuntime.InvokeVoidAsync("console.log", "INFORMATION: Home page initialized.");
+        await JsRuntime.InvokeVoidAsync("console.log", "INFORMATION: HomeModel");
+        await JsRuntime.InvokeVoidAsync("console.log", Model);
+    }
+}

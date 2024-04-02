@@ -1,0 +1,110 @@
+﻿@inherits LayoutComponentBase
+@inject IJSRuntime JsRuntime
+@inject NavigationManager NavigationManager
+
+<div class="ion-page" id="page-content">
+    <ion-header id="page-header" class="page-header">
+        <CascadingValue Value="this">
+            <ion-toolbar id="page-header-toolbar" class="page-header-toolbar">
+                <ion-buttons slot="start">
+                    <ion-menu-button></ion-menu-button>
+                </ion-buttons>
+                <ion-title class="ion-text-center">
+                    <img class="title-image" src="icon-192.png" style="height:48px;" />
+                </ion-title>
+                <ion-buttons slot="end">
+                    <SectionOutlet SectionName="header-end-button" />
+                </ion-buttons>
+            </ion-toolbar>
+            <SectionOutlet SectionName="header-toolbars" />
+        </CascadingValue>
+        <ion-progress-bar id="page-header-progress-bar" class="page-header-progress-bar hidden" type="indeterminate"></ion-progress-bar>
+    </ion-header>
+    @Body
+    <ion-footer id="page-footer" class="page-footer">
+        <ion-tab-bar slot="bottom">
+            <ion-tab-button id="page-nav-home" class="page-nav-tab" @onclick="@(() => ChangePage("/home"))">
+                <ion-icon name="home"></ion-icon>
+                <strong>Home</strong>
+            </ion-tab-button>
+            <ion-tab-button id="page-nav-counter" class="page-nav-tab" @onclick="@(() => ChangePage("/counter"))">
+                <ion-icon name="calculator"></ion-icon>
+                <strong>Counter</strong>
+            </ion-tab-button>
+            <ion-tab-button id="page-nav-weather" class="page-nav-tab" @onclick="@(() => ChangePage("/weather"))">
+                <ion-icon name="rainy"></ion-icon>
+                <strong>Weather</strong>
+            </ion-tab-button>
+        </ion-tab-bar>
+    </ion-footer>
+</div>
+
+<script type="text/javascript">
+
+    window.ChangePage = (page) => {
+        let tabs = document.querySelectorAll('.page-nav-tab');
+        let activeTab = document.getElementById('page-nav-' + page);
+
+        tabs.forEach(tab => {
+            tab.classList.remove('tab-selected');
+        });
+
+        activeTab.classList.add('tab-selected');
+    }
+    window.Refresher = (id) => {
+        let refresher = document.getElementById(id);
+        refresher.addEventListener('ionRefresh', () => { refresher.dispatchEvent(new Event('change')); });
+    }
+    window.RefresherComplete = (id) => {
+        let refresher = document.getElementById(id);
+        refresher.complete();
+    }
+    window.Modal = (options) => {
+        let modal = document.getElementById(options.id);
+
+        if (modal != null) {
+            if (options.breakpoints != null) {
+                modal.breakpoints = options.breakpoints;
+            }
+
+            if (options.canDismiss != null) {
+                modal.canDismiss = options.canDismiss;
+            }
+        }
+    }
+    window.ShowModal = (id) => {
+        let modal = document.getElementById(id);
+        modal.present();
+    }
+    window.HideModal = (id) => {
+        let modal = document.getElementById(id);
+        modal.dismiss(null, 'cancel');
+    }
+
+</script>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            string page = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+            await JsRuntime.InvokeVoidAsync("ChangePage", GetPage(page));
+        }
+    }
+
+    public async Task ChangePage(string page)
+    {
+        await JsRuntime.InvokeVoidAsync("ChangePage", GetPage(page));
+        NavigationManager.NavigateTo(page, false);
+    }
+
+    private string GetPage(string page)
+    {
+        page = page.Replace("/", "");
+        page = page == "" ? "home" : page;
+        return page;
+    }
+}

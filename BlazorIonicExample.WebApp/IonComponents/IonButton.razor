@@ -1,0 +1,27 @@
+﻿<ion-button strong="true" @onclick="InvokeOnClick">
+    @if (HasIcon)
+    {
+        <ion-icon name="@IconName" color="primary"></ion-icon>
+    }
+    @Name
+</ion-button>
+
+@code {
+    [Parameter] public string Id { get; set; } = Helpers.GetUniqueHashCode();
+    [Parameter] public string? Name { get; set; }
+    [Parameter] public string? IconName { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+
+    private bool HasIcon
+    {
+        get
+        {
+            return IconName != null;
+        }
+    }
+
+    public async Task InvokeOnClick()
+    {
+        await OnClick.InvokeAsync();
+    }
+}

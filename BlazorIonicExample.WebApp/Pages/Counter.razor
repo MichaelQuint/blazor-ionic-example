@@ -1,0 +1,47 @@
+﻿@page "/counter"
+@inherits PageComponetBase<CounterModel>
+
+<PageTitle>Counter</PageTitle>
+
+@if (Model.User != null)
+{
+    <SectionContent SectionName="header-end-button">
+        <IonButton Name="Logout" OnClick="@(() => base.LogoutAsync())" />
+    </SectionContent>
+
+    <ion-content class="ion-padding">
+        <h1>Counter</h1>
+        <p role="status">Current count: @currentCount</p>
+        <ion-button strong="true" size="small" color="secondary" @onclick="IncrementCount">Click me</ion-button>
+    </ion-content>
+}
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            await InitializeAsync();
+        }
+    }
+
+    private async Task InitializeAsync()
+    {
+        if (Model.User != null)
+        {
+            StateHasChanged();
+        }
+
+        await JsRuntime.InvokeVoidAsync("console.log", "INFORMATION: Counter page initialized.");
+        await JsRuntime.InvokeVoidAsync("console.log", "INFORMATION: CounterModel");
+        await JsRuntime.InvokeVoidAsync("console.log", Model);
+    }
+
+    private int currentCount = 0;
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}

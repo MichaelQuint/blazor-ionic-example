@@ -1,0 +1,9 @@
+﻿<ion-segment value="@Value">
+    @ChildContent
+</ion-segment>
+
+@code {
+    [Parameter] public string Id { get; set; } = Helpers.GetUniqueHashCode();
+    [Parameter] public required string Value { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

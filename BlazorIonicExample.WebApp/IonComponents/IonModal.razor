@@ -1,0 +1,48 @@
+﻿@inject IJSRuntime JsRuntime
+
+<ion-modal id="@Id" @attributes="attributes">
+    @ChildContent
+</ion-modal>
+
+@code {
+    [Parameter] public string Id { get; set; } = Helpers.GetUniqueHashCode();
+    [Parameter] public double[]? Breakpoints { get; set; }
+    [Parameter] public bool? CanDismiss { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private Dictionary<string, object> attributes = new Dictionary<string, object>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Breakpoints != null && !attributes.ContainsKey("initial-breakpoint"))
+        {
+            attributes.Add("initial-breakpoint", Breakpoints[0]);
+        }
+
+        await base.OnParametersSetAsync();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            await Initialize();
+        }
+    }
+
+    public async Task Initialize()
+    {
+        await JsRuntime.InvokeVoidAsync("console.log", $"INFORMATION: IonModal '{Id}' initialized.");
+        await JsRuntime.InvokeVoidAsync("Modal", new { id = Id, breakpoints = Breakpoints, canDismiss = CanDismiss });
+        StateHasChanged();
+    }
+    public async Task Show()
+    {
+        await JsRuntime.InvokeVoidAsync("ShowModal", Id);
+    }
+    public async Task Hide()
+    {
+        await JsRuntime.InvokeVoidAsync("HideModal", Id);
+    }
+}

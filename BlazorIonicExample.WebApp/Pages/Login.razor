@@ -1,0 +1,131 @@
+﻿@page "/"
+@inherits PageComponetBase<LoginModel>
+
+<PageTitle>Login</PageTitle>
+
+@if (Model.User == null)
+{
+    <ion-content>
+        <IonModal Breakpoints="[0.75]" CanDismiss="false" @ref="loginModal">
+            <ion-header>
+                <ion-toolbar>
+                    <IonSegmentWithContent IonContents="[loginContent, registerContent]" @ref="loginSegment" />
+                    <ion-progress-bar type="indeterminate" style="display:none;"></ion-progress-bar>
+                </ion-toolbar>
+            </ion-header>
+            <IonContent Name="Login" @ref="loginContent">
+                <ion-grid>
+                    @if (Model.LoginError != "")
+                    {
+                        <ion-row>
+                            <ion-col size="12">
+                                <strong class="ion-color-danger">@Model.LoginError</strong>
+                            </ion-col>
+                        </ion-row>
+                    }
+                    <ion-row>
+                        <ion-col size="12">
+                            <ion-input label="Username" label-placement="stacked" type="text" placeholder="" @bind-value="@Model.Username" @bind-value:event="oninput"></ion-input>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row>
+                        <ion-col size="12">
+                            <ion-input label="Password" label-placement="stacked" type="password" placeholder="" @bind-value="@Model.Password" @bind-value:event="oninput"></ion-input>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row>
+                        <ion-col size="12">
+                            <ion-button size="small" expand="block" color="secondary" style="width:100%;" disabled="@Model.LoginDisabled" @onclick="LoginAsync">Login</ion-button>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+            </IonContent>
+            <IonContent Name="Register" Visible="false" @ref="registerContent">
+                <ion-grid>
+                    <ion-row>
+                        <ion-col size="12">
+                            <ion-input label="Username" label-placement="stacked" type="text" placeholder="" @bind-value="@Model.Username" @bind-value:event="oninput"></ion-input>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row>
+                        <ion-col size="12">
+                            <ion-input label="Password" label-placement="stacked" type="password" placeholder="" @bind-value="@Model.Password" @bind-value:event="oninput"></ion-input>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row>
+                        <ion-col size="12">
+                            <ion-input label="First Name" label-placement="stacked" type="text" placeholder="" @bind-value="@Model.FirstName" @bind-value:event="oninput"></ion-input>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row>
+                        <ion-col size="12">
+                            <ion-input label="Last Name" label-placement="stacked" type="text" placeholder="" @bind-value="@Model.LastName" @bind-value:event="oninput"></ion-input>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row>
+                        <ion-col size="12">
+                            <ion-button size="small" expand="block" color="secondary" style="width:100%;" disabled="@Model.RegisterDisabled" @onclick="RegisterAsync">Register</ion-button>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+            </IonContent>
+        </IonModal>
+    </ion-content>
+}
+
+@code {
+    private IonModal loginModal;
+    private IonSegmentWithContent loginSegment;
+    private IonContent loginContent;
+    private IonContent registerContent;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // always let the base render first, this way our ModelBase is
+        // in memory and ready.
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            await InitializeAsync();
+        }
+    }
+
+    private async Task InitializeAsync()
+    {
+        if (Model.User != null)
+        {
+            NavigationManager.NavigateTo("/home", false);
+        }
+        else
+        {
+            await loginModal.Initialize();
+            await loginSegment.Initialize();
+            await loginModal.Show();
+        }
+
+        await JsRuntime.InvokeVoidAsync("console.log", "INFORMATION: Login page initialized.");
+    }
+    private async Task LoginAsync()
+    {
+        bool isValid = await base.LoginAsync(Model.Username, Model.Password);
+
+        if (isValid)
+        {
+            NavigationManager.NavigateTo("/home", true);
+        }
+        else
+        {
+            Model.LoginError = "The username or password is incorrect. default is 'admin' and 'iloveblazor'";
+        }
+    }
+    private async Task RegisterAsync()
+    {
+        bool isValid = await base.RegisterAsync(Model.Username, Model.Password, Model.FirstName, Model.LastName);
+
+        if (isValid)
+        {
+            NavigationManager.NavigateTo("/home", true);
+        }
+    }
+}

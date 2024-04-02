@@ -1,0 +1,14 @@
+﻿<ion-segment-button value="@Name.ToLower()" @onclick="InvokeOnClick">
+    <ion-label>@Name</ion-label>
+</ion-segment-button>
+
+@code {
+    [Parameter] public string Id { get; set; } = Helpers.GetUniqueHashCode();
+    [Parameter] public required string Name { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+
+    private async Task InvokeOnClick()
+    {
+        await OnClick.InvokeAsync();
+    }
+}

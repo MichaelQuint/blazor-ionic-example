@@ -1,0 +1,44 @@
+﻿@inject IJSRuntime JsRuntime
+
+<ion-progress-bar id="@Id" class="page-header-progress-bar" type="indeterminate" style="@Style"></ion-progress-bar>
+
+@code {
+    [Parameter] public string Id { get; set; } = Helpers.GetUniqueHashCode();
+    [Parameter] public bool Visible { get; set; } = true;
+    [Parameter] public string Style { get; set; } = "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            if (!Visible)
+                await SetVisible(false);
+
+            await Initialize();
+        }
+    }
+
+    public async Task Initialize()
+    {
+        await JsRuntime.InvokeVoidAsync("console.log", $"INFORMATION: IonProgressBar '{Id}' initialized.");
+    }
+    public async Task SetVisible(bool visible)
+    {
+        await Task.Run(() =>
+        {
+            Visible = visible;
+            Style = visible ? "display:block;" : "display:none;";
+            StateHasChanged();
+        });
+    }
+    public async Task Show()
+    {
+        await SetVisible(true);
+    }
+    public async Task Hide()
+    {
+        await SetVisible(false);
+    }
+}

@@ -1,0 +1,36 @@
+﻿@inject IJSRuntime JsRuntime
+
+<ion-refresher id="@Id" class="page-refresher" slot="fixed" @onchange="Refresh">
+    <ion-refresher-content></ion-refresher-content>
+</ion-refresher>
+
+@code {
+    [Parameter] public string Id { get; set; } = Helpers.GetUniqueHashCode();
+    [Parameter] public EventCallback OnRefresh { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            await Initialize();
+        }
+    }
+
+    public async Task Initialize()
+    {
+        await JsRuntime.InvokeVoidAsync("console.log", $"INFORMATION: IonRefresher '{Id}' initialized.");
+        await JsRuntime.InvokeVoidAsync("Refresher", Id);
+    }
+
+    public async Task Refresh()
+    {
+        await OnRefresh.InvokeAsync();
+    }
+
+    public async Task Complete()
+    {
+        await JsRuntime.InvokeVoidAsync("RefresherComplete", Id);
+    }
+}

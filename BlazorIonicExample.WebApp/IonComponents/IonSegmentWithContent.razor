@@ -1,0 +1,39 @@
+﻿@inject IJSRuntime JsRuntime
+
+<ion-segment value="@value">
+    @foreach (var content in IonContents)
+    {
+        if (content != null)
+        {
+            <IonSegmentButton Name="@content.Name" OnClick="@(() => Change(content))" />
+        }
+    }
+</ion-segment>
+
+@code {
+    [Parameter] public string Id { get; set; } = Helpers.GetUniqueHashCode();
+    [Parameter] public List<IonContent> IonContents { get; set; } = new List<IonContent>();
+
+    private string? value = "";
+
+    public async Task Initialize()
+    {
+        await JsRuntime.InvokeVoidAsync("console.log", $"INFORMATION: IonSegmentWithContent '{Id}' initialized.");
+
+        await Task.Run(() =>
+        {
+            value = IonContents.First()?.Name.ToLower();
+            StateHasChanged();
+        });
+    }
+    public async Task Change(IonContent activeContent)
+    {
+        value = activeContent.Name.ToLower();
+
+        var inactiveContents = IonContents.Where(c => c.Id != activeContent.Id).ToList();
+        foreach (var inactiveContent in inactiveContents)
+            await inactiveContent.Hide();
+
+        await activeContent.Show();
+    }
+}
